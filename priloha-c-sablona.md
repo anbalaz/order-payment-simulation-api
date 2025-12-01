@@ -15,7 +15,7 @@
 Vyplň približný čas strávený s každým nástrojom:
 
 - [ ] **Cursor IDE:** _____ hodín
-- [ ] **Claude Code:** 2 hodín  
+- [ ] **Claude Code:** 3 hodín
 - [ ] **GitHub Copilot:** _____ hodín
 - [ ] **ChatGPT:** _____ hodín
 - [ ] **Claude.ai:** _____ hodín
@@ -29,10 +29,10 @@ Vyplň približný čas strávený s každým nástrojom:
 
 > 💡 **Tip:** Kopíruj presný text promptu! Priebežne dopĺňaj po každej feature.
 
-### Prompt #1: _________________________________
+### Prompt #1: [Inicializacia postgres db s tabulkami- fungovala viac menej len par zadrhelov s nastavenim projektu]
 ## FEATURE:
 
-**Nástroj:** [ Claude Code]  
+**Nástroj:** [ Claude Code ]
 **Kontext:** [ Setup dbs]
 
 **Prompt:**
@@ -77,9 +77,8 @@ Include into the final solution DB upgrade mechanism. It has to contain some for
 DB scripts or DB upgrade code.
 ```
 
-**Výsledok:**  
-⭐⭐⭐⭐ Dobré, potreboval malé úpravy  
-
+**Výsledok:**
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy
 
 **Čo som musel upraviť / opraviť:**
 ```
@@ -92,14 +91,14 @@ Musel som sa ho spytat na : can you read data from postgres users table? what ar
 **Poznámky / Learnings:**
 ```
 Mal som lepsie specifikovat, za akych okolnosti je vsetko ok. Mal som mu zadat, nech skontroluje, ci vidi data v db. Taktiez som mu mohol lepsie specifikovat style, ake nugety preferujem ale som s nim zatial v pohode.
+v commande execute prp som zadal zly prompt na path ku projektu, musel som rucne opravit. Musim po napisani skontrolovat ci commandy na kontrolu vobec funguju!
 ```
 
 
+### Prompt #2: [Upravit nazov stlpca v db]
 
-### Prompt #2: _________________________________
-
-**Nástroj:** claude code  
-**Kontext:** po dokonceni mojho prp som potreboval este upravit nazov stlpca a skontrolovat ci vsetko funguje
+**Nástroj:** [Claude code]
+**Kontext:** [po dokonceni mojho prp som potreboval este upravit nazov stlpca a skontrolovat ci vsetko funguje]
 
 **Prompt:**
 ```
@@ -117,6 +116,217 @@ forget to fix it in seeded data. After doing it test if data in db are seeded an
 **Poznámky:**
 ```
 ```
+
+
+### Prompt #3: [Update Claude.md]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [update claude po velkej feature]
+
+**Prompt:**
+```
+update Claude.md 
+```
+
+**Výsledok:**  
+✅ Fungoval perfektne (first try)
+
+**Úpravy:**
+```
+```
+
+**Poznámky:**
+```
+```
+
+### Prompt #4: [Pridanie controllera pre Usera]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [update claude po velkej feature]
+
+**Prompt:**
+```
+## FEATURE:
+
+New controller for User. That would support CRUD operations. Model of user: id, name (max length 100), email (unique), password.
+Controller Should have 4 endpoints, 
+
+PUT api/user (create)
+POST api/user (update),
+GET api/user (get),
+DELETE api/user (delete).
+
+Http responses for user
+201 for created (PUT)
+Validate inputs if not valid return 400. If valid create/update/get/delete data in db if the endpoint requires it.
+401 for unauthorized (when no jwt token or token that has no right over user)
+200 OK for get, returns data about user (Id, name, email, createdAt, updatedAt)
+500 if unexpected error occurs.
+add other if you consider it necessary
+
+New authentication controller for Login, should follow REST API
+checks user credentials (email, password) and if correct, return JWT Token
+
+for invalid credentials in login return 401
+
+add integration tests into new IntegrationTests project that is in new folder test in root of the project example (.\test\IntegrationTests\IntegrationTests.csproj). 
+if necessary add unit tests into new UnitTests project that is in new folder test in root of the project example (.\test\UnitTests\UnitTests.csproj). 
+
+For tests use x-unit tests and also autofixture (https://www.nuget.org/packages/autofixture), Moq (https://www.nuget.org/packages/moq/)
+
+update Readme about new features.
+
+Remove weather controller with all its linked structure and data, It is no longer needed.
+
+At the end check if data in postgre db is changed when you use endpoints accordingly
+
+after everything works update Claude.md
+
+## EXAMPLES:
+
+model for stored data for user should be in .src/OrderPaymentSimulation.Api/Models/User.
+
+User in Models folder: 
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    // Navigation properties
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+}
+
+UserDto in Dtos folder:
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+For mapping between models do manually, classes should have static models, for example
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    public static UserDto CreateFrom (User user)
+      =>new ()
+      {
+          Name= user.Name
+          Email= user.Email,
+          Password= user.Password
+          CreatedAt= user.CreatedAt
+          UpdatedAt= user.UpdatedAt
+      }
+}
+
+
+## DOCUMENTATION:
+
+to check data and format look into mcp server for postgres tables
+
+## OTHER CONSIDERATIONS:
+
+Use Action result from Microsoft.AspNetCore.Mvc, for wrapping response body
+
+For handling authentication use Microsoft.IdentityModel.JsonWebTokens. Users should be stored in db that already exists. You should not use same model for controller and db. Create separate Dtos folder where copy of User will be. Named UserDto.
+
+All Endpoints should be protected with JWT Bearer Token (except Login endpoint and creating user). Result of Rest API
+
+use swagger for api documentation
+
+```
+
+**Výsledok:**  
+✅ Fungoval perfektne (first try)
+
+**Úpravy:**
+```
+```
+
+**Poznámky:**
+```
+```
+
+
+### Prompt #5: [Merge changes]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [robil som upravy na branchy, ktora uz bola mergnuta]
+
+**Prompt:**
+```
+merge changes
+```
+
+**Výsledok:**  
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy
+
+**Úpravy:**
+```
+ when running locally app I get from swagger: No operations defined in spec (originally I posted a picture)
+```
+
+**Poznámky:**
+```
+vagne som naformuloval prompt :), lenivo
+```
+
+
+### Prompt #6: [Change Project structure]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [fixing wrong architecture of project that was cause by my doing]
+
+**Prompt:**
+```
+ update project structure, I don't want the OrderPaymentSimulation.Api.csproj be nested in src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api. There is unnecessary one folder of OrderPaymentSimulation.Api nesting. Fix it and for all other files as well. Project and tests should be runnable
+```
+
+**Výsledok:**  
+✅ Fungoval perfektne (first try) 
+
+**Úpravy:**
+```
+
+```
+
+**Poznámky:**
+```
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 

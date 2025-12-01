@@ -73,7 +73,7 @@ From the repository root:
 
 ```bash
 dotnet build OrderPaymentSimulation.Api.sln
-cd src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api
+cd src/OrderPaymentSimulation.Api
 dotnet run
 ```
 
@@ -92,6 +92,111 @@ Open your browser and navigate to:
 - **HTTP:** http://localhost:5267/swagger
 
 The Swagger UI provides interactive API documentation and testing capabilities.
+
+## API Endpoints
+
+### Authentication
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "Test User",
+    "email": "test@example.com",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:00:00Z"
+  }
+}
+```
+
+### User Management
+
+All endpoints except **Create User** require JWT Bearer token in the Authorization header:
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+#### Create User
+```http
+PUT /api/user
+Content-Type: application/json
+
+{
+  "name": "New User",
+  "email": "newuser@example.com",
+  "password": "SecurePassword123!"
+}
+```
+
+**Response (201 Created):** UserDto with id, name, email, createdAt, updatedAt
+
+#### Update User
+```http
+POST /api/user
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "id": 3,
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "password": "NewPassword123!"  // Optional
+}
+```
+
+**Response (200 OK):** Updated UserDto
+
+#### Get User
+```http
+GET /api/user/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** UserDto
+
+#### Delete User
+```http
+DELETE /api/user/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** `{ "message": "User deleted successfully" }`
+
+### Testing the API
+
+1. **Using Swagger UI:**
+   - Navigate to https://localhost:7006/swagger
+   - Click "Authorize" button (top right)
+   - Create a user using `PUT /api/user`
+   - Login using `POST /api/auth/login` to get token
+   - Enter token in format: `Bearer <your-token-here>`
+   - Click "Authorize"
+   - Now you can test protected endpoints
+
+2. **Using curl:**
+```bash
+# Login
+curl -X POST https://localhost:7006/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Password123!"}'
+
+# Get user (replace {token} and {id})
+curl https://localhost:7006/api/user/1 \
+  -H "Authorization: Bearer {token}"
+```
 
 ## Database Information
 
@@ -149,7 +254,7 @@ dotnet test
 #### Create a New Migration (Optional)
 
 ```bash
-cd src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api
+cd src/OrderPaymentSimulation.Api
 dotnet ef migrations add <MigrationName>
 ```
 

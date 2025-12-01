@@ -1,278 +1,515 @@
 ## FEATURE:
 
-Initialize Postgres in docker
+New controller for User. That would support CRUD operations. Model of user: id, name (max length 100), email (unique), password.
 
-I have docker desktop app. Run Postgres in docker and initialize it with docker compose file. Include compose file in repository, store it in Folder Postgres. Database should hold data about orders, users, payments, so choose good name for it.
-Add mcp server to Postgres and connect to it, add this settings to repository, so you can use it.
+Controller Should have 4 endpoints,
 
-In postgres should be these tables:
+PUT api/user (create)
+POST api/user (update),
+GET api/user (get),
+DELETE api/user (delete).
 
-Users:
-id
-name max length 100,
-email max length 100 and unique,
-password string (should be hashed and protected like passwords are in db, so nobody can decipher them).
+Http responses for user
+201 for created (PUT)
+Validate inputs if not valid return 400. If valid create/update/get/delete data in db if the endpoint requires it.
+401 for unauthorized (when no jwt token or token that has no right over user)
+200 OK for get, returns data about user (Id, name, email, createdAt, updatedAt)
+500 if unexpected error occurs.
+add other if you consider it necessary
 
-Products:
-id,
-name max length 100,
-description string,
-price number >=0,
-created_at timestamp
+New authentication controller for Login, should follow REST API
+checks user credentials (email, password) and if correct, return JWT Token
 
-Orders:
-id,
-user_id,
-total number >=0,
-status (should be enum, in db store it as tinyInt or similar type),
-items schema id (primary key),
-product_id,
-quantity (number>0)
-price (number>0)
-created_at timestamp
-updated_at timestamp
+for invalid credentials in login return 401
 
-In orders user_id is id from Users table and product_id is reference to id from Products table.
+add integration tests into new IntegrationTests project that is in new folder test in root of the project example (.\test\IntegrationTests\IntegrationTests.csproj).
+if necessary add unit tests into new UnitTests project that is in new folder test in root of the project example (.\test\UnitTests\UnitTests.csproj).
 
-Include in DBS also initial seed data for tables. These scripts tore in Postgres folder.
+For tests use x-unit tests and also autofixture (https://www.nuget.org/packages/autofixture), Moq (https://www.nuget.org/packages/moq/)
 
-Include into the final solution DB upgrade mechanism. It has to contain some form of upgrade
-DB scripts or DB upgrade code.
+update Readme about new features.
 
-Create README.md file in root of project with documentation on:
-- How to start PostgreSQL database using Docker Compose
-- How to run DB upgrade/migration tool
-- How to start the service
-- Prerequisites and dependencies
-- Basic project overview
+Remove weather controller with all its linked structure and data, It is no longer needed.
+
+At the end check if data in postgre db is changed when you use endpoints accordingly
+
+after everything works update Claude.md
 
 ## PROJECT CONTEXT:
 
-**Current Project Structure:**
-- Solution file: `OrderPaymentSimulation.Api.sln` (root directory)
-- Main API project: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/`
+**Existing Project Structure:**
+- Solution: `OrderPaymentSimulation.Api.sln` (root)
+- Main API: `src/OrderPaymentSimulation.Api/` (note: single-level directory structure)
 - Root namespace: `order_payment_simulation_api`
-- Target framework: .NET 8.0
-- Current dependencies: Only Swashbuckle.AspNetCore 6.6.2 for Swagger/OpenAPI
+- Framework: .NET 8.0
+- Database: PostgreSQL 16 (Docker container: `order-payment-db`)
 
-**Relevant Files to Reference:**
-- Project file: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api.csproj:1-14`
-- Application entry point: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/Program.cs:1-25`
-- Configuration: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/appsettings.json:1-9`
-- Project documentation: `CLAUDE.md:1-52`
+**Current Database & Entity Setup:**
+The User model already exists with proper configuration:
 
-**Current State:**
-- Minimal ASP.NET Core boilerplate with default WeatherForecast controller
-- No database configuration or Entity Framework setup yet
-- No connection strings configured in appsettings.json
-- Controllers use attribute routing pattern `[Route("[controller]")]`
-- Swagger enabled in Development environment
-- Application runs on http://localhost:5267 and https://localhost:7006
+1. **User Model** (`src/OrderPaymentSimulation.Api/Models/User.cs:1-14`)
+   - Properties: Id, Name, Email, Password, CreatedAt, UpdatedAt
+   - Navigation: ICollection<Order> Orders
+   - Password hashing already implemented in SeedData using `PasswordHasher<User>` from Microsoft.AspNetCore.Identity
 
-**Implementation Notes:**
-1. **NuGet Packages Required:**
-   - Add `Npgsql.EntityFrameworkCore.PostgreSQL` for PostgreSQL provider
-   - Add `Microsoft.EntityFrameworkCore.Design` for migrations tooling
-   - Consider `Microsoft.EntityFrameworkCore.Tools` for EF Core CLI commands
-   - Consider migration library (e.g., FluentMigrator or EF Core Migrations)
+2. **User Database Configuration** (`src/OrderPaymentSimulation.Api/Data/Configurations/UserConfiguration.cs:1-48`)
+   - Table: `users` (snake_case)
+   - Columns: id, name, email, password, created_at, updated_at
+   - Constraints: email unique index (idx_users_email), name max 100, email max 100
+   - Default timestamps: CURRENT_TIMESTAMP
+   - Cascade delete to Orders
 
-2. **Docker Compose File Location:**
-   - Create new directory: `Postgres/` in repository root
-   - Store `docker-compose.yml` in `Postgres/` folder
-   - Store seed scripts (.sql files) in `Postgres/` folder
+3. **Database Context** (`src/OrderPaymentSimulation.Api/Data/OrderPaymentDbContext.cs`)
+   - Already configured with PostgreSQL via Npgsql
+   - Uses IEntityTypeConfiguration pattern
+   - Connection string in appsettings.json
 
-3. **Configuration Updates:**
-   - Add connection string to `appsettings.json:1-9` and `appsettings.Development.json`
-   - Register DbContext in `Program.cs:1-25` (add after line 5: `builder.Services.AddControllers();`)
-   - Consider creating separate configuration section for database settings
+4. **Seed Data** (`src/OrderPaymentSimulation.Api/Data/SeedData.cs:1-110`)
+   - 2 test users with hashed passwords:
+     - admin@example.com / Password123!
+     - test@example.com / Password123!
+   - Password hashing pattern at line 16-40 shows how to hash/verify
 
-4. **Project Structure to Create:**
-   - `README.md` in repository root with complete setup documentation
-   - `Models/` directory for entity classes (User, Product, Order, OrderItem)
-   - `Data/` directory for DbContext and configurations
-   - `Data/Migrations/` for EF Core migrations or migration scripts
-   - `Postgres/` directory for Docker compose and seed scripts
+**Controller Pattern:**
+See existing controller for reference:
+- `src/OrderPaymentSimulation.Api/Controllers/WeatherForecastController.cs:1-32`
+  - Uses `[ApiController]` and `[Route("[controller]")]` attributes
+  - Inherits from ControllerBase
+  - Namespace: `order_payment_simulation_api.Controllers`
 
-5. **Database Schema Considerations:**
-   - Use PostgreSQL conventions (snake_case for column names is common)
-   - Implement proper indexing on foreign keys and email field
-   - Use `timestamp with time zone` for timestamp fields in PostgreSQL
-   - Consider using PostgreSQL sequences for auto-incrementing IDs
-   - For password hashing, use ASP.NET Core Identity's PasswordHasher or bcrypt
+**Middleware & Configuration** (`src/OrderPaymentSimulation.Api/Program.cs:1-52`):
+- DbContext registered at line 12-13
+- Controllers added at line 15
+- Swagger configured at line 17-18
+- Authorization middleware exists at line 48 (but not configured yet)
+- Database initialization at line 29-30
 
-6. **Database Migration Strategy Options:**
-   - **Option A:** EF Core Migrations (integrates with Entity Framework, code-first approach)
-   - **Option B:** FluentMigrator (more control, supports versioned migration scripts)
-   - **Option C:** DbUp (simple SQL script runner with version tracking)
-   - Recommendation: Start with EF Core Migrations for .NET 8.0 integration
+**Database Connection Details:**
+- Host: localhost:5432
+- Database: order_payment_simulation
+- User: orderuser
+- Password: dev_password
+- Docker container: order-payment-db
+- Compose file: `Postgres/docker-compose.yml`
 
-7. **README.md Documentation:**
-   - Create `README.md` in repository root
-   - Document complete setup process from scratch
-   - Include Docker Compose commands for database
-   - Document migration/upgrade commands (e.g., `dotnet ef database update`)
-   - Include service startup commands
-   - List all prerequisites (Docker Desktop, .NET 8.0 SDK)
-   - Add troubleshooting section for common issues
+**Template Code to Remove:**
+- `src/OrderPaymentSimulation.Api/Controllers/WeatherForecastController.cs:1-32`
+- `src/OrderPaymentSimulation.Api/WeatherForecast.cs`
 
 ## EXAMPLES:
 
-**Docker Compose Structure:**
-Create `Postgres/docker-compose.yml`:
-```yaml
-version: '3.8'
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: order-payment-db
-    environment:
-      POSTGRES_DB: order_payment_simulation
-      POSTGRES_USER: orderuser
-      POSTGRES_PASSWORD: dev_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
-volumes:
-  postgres_data:
-```
-
-**Connection String Example for appsettings.json:**
-```json
+**User Model (Already Exists):**
+Located at `src/OrderPaymentSimulation.Api/Models/User.cs:1-14`:
+```csharp
+public class User
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=order_payment_simulation;Username=orderuser;Password=dev_password"
-  },
-  "Logging": { ... }
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    // Navigation properties
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
 ```
 
-**DbContext Registration in Program.cs (after line 5):**
+**UserDto to Create:**
+Create new folder `src/OrderPaymentSimulation.Api/Dtos/` and add UserDto:
 ```csharp
-builder.Services.AddDbContext<OrderPaymentDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+namespace order_payment_simulation_api.Dtos;
+
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    // Static mapping method (manual mapping, no AutoMapper)
+    public static UserDto CreateFrom(User user)
+        => new()
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+}
 ```
 
-**README.md Structure Example:**
-Create `README.md` in repository root:
-```markdown
-# Order Payment Simulation API
+**Note:** UserDto should NOT include Password field for security reasons (only used in request DTOs, not response)
 
-ASP.NET Core 8.0 Web API for simulating order payment workflows.
+**Additional DTOs to Create:**
+```csharp
+// For user creation (PUT api/user)
+public class CreateUserRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
 
-## Prerequisites
+// For user update (POST api/user)
+public class UpdateUserRequest
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? Password { get; set; } // Optional for update
+}
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- Git
+// For login (POST api/auth/login)
+public class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
 
-## Getting Started
+public class LoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public UserDto User { get; set; } = null!;
+}
+```
 
-### 1. Start PostgreSQL Database
+**Controller Pattern (based on WeatherForecastController.cs:1-32):**
+Create `src/OrderPaymentSimulation.Api/Controllers/UserController.cs`:
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using order_payment_simulation_api.Dtos;
 
-Navigate to the Postgres directory and start the database:
+namespace order_payment_simulation_api.Controllers;
 
-\`\`\`bash
-cd Postgres
-docker-compose up -d
-\`\`\`
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
+{
+    private readonly OrderPaymentDbContext _context;
+    private readonly ILogger<UserController> _logger;
 
-Verify the database is running:
-\`\`\`bash
-docker ps
-\`\`\`
+    public UserController(OrderPaymentDbContext context, ILogger<UserController> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
 
-### 2. Run Database Migrations
+    [HttpPut]
+    // [AllowAnonymous] - Allow user creation without authentication
+    public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
+    {
+        // Validate, hash password, save to DB
+        // Return 201 Created with UserDto
+    }
 
-Navigate to the API project directory and run migrations:
+    [HttpPost]
+    [Authorize] // Requires JWT token
+    public async Task<IActionResult> Update([FromBody] UpdateUserRequest request)
+    {
+        // Validate JWT, check authorization, update user
+        // Return 200 OK with updated UserDto
+    }
 
-\`\`\`bash
-cd src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api
-dotnet ef database update
-\`\`\`
+    // ... GET and DELETE endpoints
+}
+```
 
-This will create all tables and apply seed data.
+**Password Hashing Pattern (from SeedData.cs:16-40):**
+```csharp
+using Microsoft.AspNetCore.Identity;
 
-### 3. Start the API Service
+var passwordHasher = new PasswordHasher<User>();
 
-From the API project directory:
+// Hash password when creating user
+user.Password = passwordHasher.HashPassword(user, plainTextPassword);
 
-\`\`\`bash
-dotnet run
-\`\`\`
+// Verify password when logging in
+var result = passwordHasher.VerifyHashedPassword(user, user.Password, plainTextPassword);
+if (result == PasswordVerificationResult.Success)
+{
+    // Password is correct
+}
+```
 
-Or run with specific profile:
-\`\`\`bash
-dotnet run --launch-profile https  # https://localhost:7006
-dotnet run --launch-profile http   # http://localhost:5267
-\`\`\`
+1. **User Model** (`src/OrderPaymentSimulation.Api/Models/User.cs:1-14`)
+   - Properties: Id, Name, Email, Password, CreatedAt, UpdatedAt
+   - Navigation: ICollection<Order> Orders
+   - Password hashing already implemented in SeedData using `PasswordHasher<User>` from Microsoft.AspNetCore.Identity
 
-### 4. Access Swagger UI
+2. **User Database Configuration** (`src/OrderPaymentSimulation.Api/Data/Configurations/UserConfiguration.cs:1-48`)
+   - Table: `users` (snake_case)
+   - Columns: id, name, email, password, created_at, updated_at
+   - Constraints: email unique index (idx_users_email), name max 100, email max 100
+   - Default timestamps: CURRENT_TIMESTAMP
+   - Cascade delete to Orders
 
-Open your browser and navigate to:
-- https://localhost:7006/swagger (HTTPS)
-- http://localhost:5267/swagger (HTTP)
+3. **Database Context** (`src/OrderPaymentSimulation.Api/Data/OrderPaymentDbContext.cs`)
+   - Already configured with PostgreSQL via Npgsql
+   - Uses IEntityTypeConfiguration pattern
+   - Connection string in appsettings.json
 
-## Database Information
+4. **Seed Data** (`src/OrderPaymentSimulation.Api/Data/SeedData.cs:1-110`)
+   - 2 test users with hashed passwords:
+     - admin@example.com / Password123!
+     - test@example.com / Password123!
+   - Password hashing pattern at line 16-40 shows how to hash/verify
 
-- **Database Name:** order_payment_simulation
-- **Port:** 5432
-- **Username:** orderuser
-- **Password:** dev_password (development only)
+**Controller Pattern:**
+See existing controller for reference:
+- `src/OrderPaymentSimulation.Api/Controllers/WeatherForecastController.cs:1-32`
+  - Uses `[ApiController]` and `[Route("[controller]")]` attributes
+  - Inherits from ControllerBase
+  - Namespace: `order_payment_simulation_api.Controllers`
 
-## Available Commands
+**Middleware & Configuration** (`src/OrderPaymentSimulation.Api/Program.cs:1-52`):
+- DbContext registered at line 12-13
+- Controllers added at line 15
+- Swagger configured at line 17-18
+- Authorization middleware exists at line 48 (but not configured yet)
+- Database initialization at line 29-30
 
-### Build the solution
-\`\`\`bash
-dotnet build OrderPaymentSimulation.Api.sln
-\`\`\`
+**Database Connection Details:**
+- Host: localhost:5432
+- Database: order_payment_simulation
+- User: orderuser
+- Password: dev_password
+- Docker container: order-payment-db
+- Compose file: `Postgres/docker-compose.yml`
 
-### Run tests
-\`\`\`bash
-dotnet test
-\`\`\`
+**Template Code to Remove:**
+- `src/OrderPaymentSimulation.Api/Controllers/WeatherForecastController.cs:1-32`
+- `src/OrderPaymentSimulation.Api/WeatherForecast.cs`
 
-### Create new migration
-\`\`\`bash
-cd src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api
-dotnet ef migrations add MigrationName
-\`\`\`
+## EXAMPLES:
 
-### Stop the database
-\`\`\`bash
-cd Postgres
-docker-compose down
-\`\`\`
+**User Model (Already Exists):**
+Located at `src/OrderPaymentSimulation.Api/Models/User.cs:1-14`:
+```csharp
+public class User
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
-## Troubleshooting
+    // Navigation properties
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+}
+```
 
-### Database connection fails
-- Ensure Docker Desktop is running
-- Check if PostgreSQL container is running: `docker ps`
-- Verify port 5432 is not in use by another application
+**UserDto to Create:**
+Create new folder `src/OrderPaymentSimulation.Api/Dtos/` and add UserDto:
+```csharp
+namespace order_payment_simulation_api.Dtos;
 
-### Migration errors
-- Ensure database is running before running migrations
-- Check connection string in appsettings.json
-- Try: `dotnet ef database drop` then `dotnet ef database update`
+public class UserDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+
+    // Static mapping method (manual mapping, no AutoMapper)
+    public static UserDto CreateFrom(User user)
+        => new()
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt
+        };
+}
+```
+
+**Note:** UserDto should NOT include Password field for security reasons (only used in request DTOs, not response)
+
+**Additional DTOs to Create:**
+```csharp
+// For user creation (PUT api/user)
+public class CreateUserRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+// For user update (POST api/user)
+public class UpdateUserRequest
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? Password { get; set; } // Optional for update
+}
+
+// For login (POST api/auth/login)
+public class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class LoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public UserDto User { get; set; } = null!;
+}
+```
+
+**Controller Pattern (based on WeatherForecastController.cs:1-32):**
+Create `src/OrderPaymentSimulation.Api/Controllers/UserController.cs`:
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using order_payment_simulation_api.Dtos;
+
+namespace order_payment_simulation_api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
+{
+    private readonly OrderPaymentDbContext _context;
+    private readonly ILogger<UserController> _logger;
+
+    public UserController(OrderPaymentDbContext context, ILogger<UserController> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
+
+    [HttpPut]
+    // [AllowAnonymous] - Allow user creation without authentication
+    public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
+    {
+        // Validate, hash password, save to DB
+        // Return 201 Created with UserDto
+    }
+
+    [HttpPost]
+    [Authorize] // Requires JWT token
+    public async Task<IActionResult> Update([FromBody] UpdateUserRequest request)
+    {
+        // Validate JWT, check authorization, update user
+        // Return 200 OK with updated UserDto
+    }
+
+    // ... GET and DELETE endpoints
+}
+```
+
+**Password Hashing Pattern (from SeedData.cs:16-40):**
+```csharp
+using Microsoft.AspNetCore.Identity;
+
+var passwordHasher = new PasswordHasher<User>();
+
+// Hash password when creating user
+user.Password = passwordHasher.HashPassword(user, plainTextPassword);
+
+// Verify password when logging in
+var result = passwordHasher.VerifyHashedPassword(user, user.Password, plainTextPassword);
+if (result == PasswordVerificationResult.Success)
+{
+    // Password is correct
+}
+>>>>>>> Stashed changes
 ```
 
 ## DOCUMENTATION:
 
 **External Resources:**
-- PostgreSQL with .NET: https://www.npgsql.org/efcore/
-- EF Core Migrations: https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/
-- Docker Compose: https://docs.docker.com/compose/
-- ASP.NET Core Data Access: https://learn.microsoft.com/en-us/aspnet/core/data/
+- JWT Authentication in .NET: https://learn.microsoft.com/en-us/aspnet/core/security/authentication/
+- xUnit: https://xunit.net/
+- AutoFixture: https://www.nuget.org/packages/autofixture
+- Moq: https://www.nuget.org/packages/moq/
 
 **Internal References:**
-- Project overview and build commands: `CLAUDE.md:1-52`
-- Current project configuration: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api.csproj:1-14`
-- Application startup and middleware: `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api/Program.cs:1-25`
-- Setup documentation (to be created): `README.md` in repository root
+- Current project documentation: `CLAUDE.md:1-274`
+- User model: `src/OrderPaymentSimulation.Api/Models/User.cs:1-14`
+- User configuration: `src/OrderPaymentSimulation.Api/Data/Configurations/UserConfiguration.cs:1-48`
+- Database context: `src/OrderPaymentSimulation.Api/Data/OrderPaymentDbContext.cs`
+- Seed data (password hashing): `src/OrderPaymentSimulation.Api/Data/SeedData.cs:16-40`
+- Program.cs (middleware): `src/OrderPaymentSimulation.Api/Program.cs:1-52`
+- Database setup: `Postgres/docker-compose.yml`
 
-**MCP Server Setup:**
-- MCP (Model Context Protocol) server configuration should be added to repository
-- Typically stored in `.claude/` directory or similar configuration location
-- Will require PostgreSQL connection details matching docker-compose configuration
+**Database Verification:**
+Use MCP server for PostgreSQL or connect directly:
+```bash
+docker exec -it order-payment-db psql -U orderuser -d order_payment_simulation
+\dt  # List tables
+SELECT * FROM users;
+```
+
+**NuGet Packages Required:**
+Add to `src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api.csproj`:
+- Microsoft.AspNetCore.Authentication.JwtBearer (for JWT authentication)
+- Microsoft.IdentityModel.Tokens (for JWT token generation)
+- System.IdentityModel.Tokens.Jwt (for JWT handling)
+- For tests: xunit, xunit.runner.visualstudio, AutoFixture, Moq
+
+**ActionResult Pattern:**
+Use `ActionResult<T>` from Microsoft.AspNetCore.Mvc for wrapping responses:
+```csharp
+[HttpGet("{id}")]
+public async Task<ActionResult<UserDto>> Get(int id)
+{
+    var user = await _context.Users.FindAsync(id);
+    if (user == null)
+        return NotFound();
+
+    return Ok(UserDto.CreateFrom(user));
+}
+```
+
+**JWT Configuration:**
+Add to `appsettings.json` (similar to connection string pattern):
+```json
+{
+  "Jwt": {
+    "Key": "your-256-bit-secret-key-here-minimum-32-characters",
+    "Issuer": "OrderPaymentSimulation",
+    "Audience": "OrderPaymentSimulation",
+    "ExpiryMinutes": 60
+  }
+}
+```
+
+Register in `Program.cs` (after line 13, before AddControllers):
+```csharp
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => { /* configure */ });
+```
+
+**Authorization:**
+- Login endpoint (`POST api/auth/login`): [AllowAnonymous]
+- Create user (`PUT api/user`): [AllowAnonymous]
+- All other endpoints: [Authorize] attribute
+
+**Swagger Configuration:**
+Update swagger config in `Program.cs:17-18` to support JWT bearer tokens for testing
+
+**Testing Strategy:**
+1. **Integration Tests** (`test/IntegrationTests/`)
+   - Test against real PostgreSQL database (use test container or separate test DB)
+   - Test full API endpoints (User CRUD, Login)
+   - Verify database state changes
+
+2. **Unit Tests** (`test/UnitTests/`)
+   - Test password hashing/verification
+   - Test DTO mapping
+   - Test validation logic
+
+**Database Change Verification:**
+After implementation, verify using:
+1. Swagger UI to call endpoints
+2. PostgreSQL MCP server to query tables
+3. Integration tests that assert DB state
