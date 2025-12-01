@@ -36,16 +36,16 @@ The AI agent only gets the context you are appending to the PRP and training dat
 - Start with pseudocode showing approach
 - Reference real files for patterns
 - Include error handling strategy
-- list tasks to be completed to fullfill the PRP in the order they should be completed
+- list tasks to be completed to fulfill the PRP in the order they should be completed
 
 ### Validation Gates (Must be Executable) for c#
 ```bash
 # compile
-dotnet dotnet build .\src\SkinAnalyzer.Api\SkinAnalyzer.Api.csproj
+dotnet dotnet build .\src\OrderPaymentSimulation.Api\OrderPaymentSimulation.Api.csproj
 
 # Unit Tests
-dotnet test .\test\IntegrationTests\IntegrationTests.csproj
-dotnet test .\test\UnitTests\UnitTests.csproj
+# dotnet test .\test\IntegrationTests\IntegrationTests.csproj
+# dotnet test .\test\UnitTests\UnitTests.csproj
 ```
 
 *** CRITICAL AFTER YOU ARE DONE RESEARCHING AND EXPLORING THE CODEBASE BEFORE YOU START WRITING THE PRP ***

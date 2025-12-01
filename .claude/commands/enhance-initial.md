@@ -28,7 +28,6 @@ Enhances INITIAL.md by adding concrete codebase context to prepare it as better 
 
 ### EXAMPLES Section
 - Instead of generic references, add concrete paths
-- E.g., "Look at TaskEntity in `src/main/java/.../TaskEntity.java:15`"
 
 ### FEATURE Section
 - Add notes about existing similar implementations

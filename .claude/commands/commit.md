@@ -71,3 +71,8 @@ ci: add Confluent validation to PR workflow
 ```
 
 ---
+
+## Additional Notes
+
+- **Never commit directly to master branch** - use /create-branch first to create a proper feature branch
+- **Do NOT add** "Generated with Claude Code" or "Co-Authored-By: Claude" attribution

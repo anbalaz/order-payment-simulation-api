@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(dir:*)",
-      "Bash(dotnet:*)"
+      "Bash(dotnet:*)",
+      "Bash(git commit:*)",
+      "WebSearch",
+      "Bash(docker-compose up:*)",
+      "Bash(del nul)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
