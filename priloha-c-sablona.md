@@ -139,7 +139,7 @@ update Claude.md
 ```
 ```
 
-### Prompt #5: [Pridanie controllera pre Usera]
+### Prompt #4: [Pridanie controllera pre Usera]
 
 **Nástroj:** [ Claude Code]   
 **Kontext:** [update claude po velkej feature]
@@ -261,53 +261,63 @@ use swagger for api documentation
 ```
 
 
-
-
-### Prompt #4: [Update Claude.md]
+### Prompt #5: [Merge changes]
 
 **Nástroj:** [ Claude Code]   
-**Kontext:** [update claude po velkej feature]
+**Kontext:** [robil som upravy na branchy, ktora uz bola mergnuta]
 
 **Prompt:**
 ```
-update Claude.md 
+merge changes
 ```
 
 **Výsledok:**  
-✅ Fungoval perfektne (first try)
-
-
-
-
-### Prompt #4: [Update Claude.md]
-
-**Nástroj:** [ Claude Code]   
-**Kontext:** [update claude po velkej feature]
-
-**Prompt:**
-```
-update Claude.md 
-```
-
-**Výsledok:**  
-✅ Fungoval perfektne (first try)
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy
 
 **Úpravy:**
 ```
+ when running locally app I get from swagger: No operations defined in spec (originally I posted a picture)
 ```
 
 **Poznámky:**
 ```
+vagne som naformuloval prompt :), lenivo
+```
+
+
+### Prompt #6: [Change Project structure]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [fixing wrong architecture of project that was cause by my doing]
+
+**Prompt:**
+```
+ update project structure, I don't want the OrderPaymentSimulation.Api.csproj be nested in src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api. There is unnecessary one folder of OrderPaymentSimulation.Api nesting. Fix it and for all other files as well. Project and tests should be runnable
+```
+
+**Výsledok:**  
+✅ Fungoval perfektne (first try) 
+
+**Úpravy:**
+```
+
+```
+
+**Poznámky:**
+```
+
 ```
 
 
 
 
- when running locally app I get from swagger: No operations defined in spec (originally I posted a picture)
 
 
 
- update project structure, I don't want the OrderPaymentSimulation.Api.csproj be nested in src/OrderPaymentSimulation.Api/OrderPaymentSimulation.Api. There is unnecessary one folder of OrderPaymentSimulation.Api nesting. Fix it and for all other files as well. Project and tests should be runnable
+
+
+
+
 
 
 
