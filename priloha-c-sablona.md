@@ -15,7 +15,7 @@
 Vyplň približný čas strávený s každým nástrojom:
 
 - [ ] **Cursor IDE:** _____ hodín
-- [ ] **Claude Code:** _____ hodín  
+- [ ] **Claude Code:** 2 hodín  
 - [ ] **GitHub Copilot:** _____ hodín
 - [ ] **ChatGPT:** _____ hodín
 - [ ] **Claude.ai:** _____ hodín
@@ -30,44 +30,85 @@ Vyplň približný čas strávený s každým nástrojom:
 > 💡 **Tip:** Kopíruj presný text promptu! Priebežne dopĺňaj po každej feature.
 
 ### Prompt #1: _________________________________
+## FEATURE:
 
-**Nástroj:** [ Cursor / Claude Code / Copilot / ChatGPT / Iné ]  
-**Kontext:** [ Setup projektu / OAuth implementácia / ... ]
+**Nástroj:** [ Claude Code]  
+**Kontext:** [ Setup dbs]
 
 **Prompt:**
 ```
-[Sem vlož celý text promptu - presne ako si ho zadal do AI]
+Initialize Postgres in docker
+
+I have docker desktop app. Run Postgres in docker and initialize it with docker compose file. Include compose file in repository, store it in Folder Postgres. Database should hold data about orders, users, payments, so choose good name for it.
+Add mcp server to Postgres and connect to it, add this settings to repository, so you can use it.
+
+In postgres should be these tables:
+
+Users:
+id
+name max length 100,
+email max length 100 and unique,
+password string (should be hashed and protected like passwords are in db, so nobody can decipher them).
+
+Products:
+id, 
+name max length 100,
+description string,
+price number >=0,
+created_at timestamp
+
+Orders:
+id, 
+user_id,
+total number >=0, 
+status (should be enum, in db store it as tinyInt or similar type),
+items schema id (primary key),
+product_id,
+quantity (number>0)
+price (number>0)
+created_at timestamp
+updated_at timestamp
+
+In orders user_id is id from Users table and product_id is reference to id from Products table.
+
+Include in DBS also initial seed data for tables. These scripts tore in Postgres folder.
+
+Include into the final solution DB upgrade mechanism. It has to contain some form of upgrade
+DB scripts or DB upgrade code.
 ```
 
 **Výsledok:**  
-[ ] ✅ Fungoval perfektne (first try)  
-[ ] ⭐⭐⭐⭐ Dobré, potreboval malé úpravy  
-[ ] ⭐⭐⭐ OK, potreboval viac úprav  
-[ ] ⭐⭐ Slabé, musel som veľa prepísať  
-[ ] ❌ Nefungoval, musel som celé prepísať
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy  
+
 
 **Čo som musel upraviť / opraviť:**
 ```
-[Popíš čo si musel zmeniť. Ak nič, napíš "Nič, fungoval perfektne"]
+zabudol som este na Readme, musel som claude poziadat o pridanie: Also in INITIAL.md add step for new file Readme.md in root of project and document how to run DB upgrade tool and how to start the service.
+Prejekt aj db fungovali, ale nenaseedoval data do db.
+
+Musel som sa ho spytat na : can you read data from postgres users table? what are first 2 users data? 
 ```
 
 **Poznámky / Learnings:**
 ```
-[Prečo fungoval / nefungoval? Čo by si urobil inak?]
+Mal som lepsie specifikovat, za akych okolnosti je vsetko ok. Mal som mu zadat, nech skontroluje, ci vidi data v db. Taktiez som mu mohol lepsie specifikovat style, ake nugety preferujem ale som s nim zatial v pohode.
 ```
 
 
 
 ### Prompt #2: _________________________________
 
-**Nástroj:** _________________  
-**Kontext:** _________________
+**Nástroj:** claude code  
+**Kontext:** po dokonceni mojho prp som potreboval este upravit nazov stlpca a skontrolovat ci vsetko funguje
 
 **Prompt:**
 ```
+it works, thanks. In the table User I see you used column name password_hash instead of password. Please rename it and also renami it in C# model. Don't     
+forget to fix it in seeded data. After doing it test if data in db are seeded and if migration works.
 ```
 
 **Výsledok:**  
+✅ Fungoval perfektne (first try)
 
 **Úpravy:**
 ```
