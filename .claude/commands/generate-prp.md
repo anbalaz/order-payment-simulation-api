@@ -41,7 +41,7 @@ The AI agent only gets the context you are appending to the PRP and training dat
 ### Validation Gates (Must be Executable) for c#
 ```bash
 # compile
-dotnet dotnet build .\src\OrderPaymentSimulation.Api\OrderPaymentSimulation.Api.csproj
+dotnet build .\src\OrderPaymentSimulation.Api\OrderPaymentSimulation.Api.csproj
 
 # Unit Tests
 # dotnet test .\test\IntegrationTests\IntegrationTests.csproj

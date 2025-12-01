@@ -9,7 +9,11 @@
       "Bash(del nul)",
       "Bash(docker exec:*)",
       "Bash(docker-compose:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

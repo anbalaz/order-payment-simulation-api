@@ -2,7 +2,12 @@
 
 Add all staged changes and create a commit following the Conventional Commits specification.
 
-**Optional US Number**: $ARGUMENTS (if provided, use this as the user story number instead of extracting from branch name)
+**Optional Parameters**: $ARGUMENTS can include:
+- US Number (e.g., 12345)
+- Type (e.g., feat, fix, chore, docs, test, refactor, style, perf, ci, build, revert)
+- Both in any order (e.g., "12345 feat" or "feat 12345")
+
+If parameters are provided, use them; otherwise, extract type/US number from branch name or ask the user.
 
 ---
 
@@ -42,7 +47,17 @@ Use ! after type/scope (e.g., feat(api)!: breaking change) or include BREAKING C
 
 ---
 
-## Examples
+## Usage Examples
+
+```
+/commit                    # Extract type/US from branch name or ask
+/commit 12345              # Use US number 12345
+/commit feat               # Use type 'feat'
+/commit 12345 feat         # Use both (any order)
+/commit feat 12345         # Use both (any order)
+```
+
+## Commit Message Examples
 
 ```
 # Branch: feature/12345_user_authentication
