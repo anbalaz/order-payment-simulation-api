@@ -15,7 +15,7 @@
 Vyplň približný čas strávený s každým nástrojom:
 
 - [ ] **Cursor IDE:** _____ hodín
-- [ ] **Claude Code:** 3 hodín
+- [ ] **Claude Code:** 5 hodín
 - [ ] **GitHub Copilot:** _____ hodín
 - [ ] **ChatGPT:** _____ hodín
 - [ ] **Claude.ai:** _____ hodín
@@ -308,6 +308,83 @@ vagne som naformuloval prompt :), lenivo
 
 ```
 
+
+### Prompt #6: [Add Products and Orders controllers]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [pridanie controllerov pre orders and products]
+
+**Prompt:**
+```
+ New controller for Products. Product has following fields: id, name string max length 100, description string, price number >=
+0, stock number >= 0, created_at timestamp.
+Validate input DTOs. If wrong return 400
+
+new controller for Orders. Order has following fields: id, user_id , total number >= 0, status enum (pending, processing,
+completed, expired), items schema id primary key, product_id, quantity number > 0, price
+number > 0 created_at timestamp, updated_at timestamp
+Create CRUD REST API for this module
+Validate input DTOs. The rules are in scheme
+
+
+Controllers Should have 4 endpoints, 
+
+inspire the responses and status codes from @UsersCcntroller
+
+add additional Http status codes if you consider it necessary
+
+add integration tests into new IntegrationTests project that is in new folder test in root of the project example (.\test\IntegrationTests\IntegrationTests.csproj). 
+if necessary add unit tests into new UnitTests project that is in new folder test in root of the project example (.\test\UnitTests\UnitTests.csproj). 
+
+For tests use x-unit tests and also autofixture (https://www.nuget.org/packages/autofixture), Moq (https://www.nuget.org/packages/moq/)
+
+update Readme about new features.
+
+At the end check if data in postgres db is changed when you use endpoints accordingly
+
+after everything works update Claude.md
+
+## EXAMPLES:
+
+inspire how db model for user is in folder   .src/OrderPaymentSimulation.Api/Models/User.
+and also its controller model is in .src/OrderPaymentSimulation.Api/Dtos folder
+
+for mapping between models use the example in UserDto method CreateFrom
+
+## DOCUMENTATION:
+
+to check data and format look into mcp server for postgres tables
+
+## OTHER CONSIDERATIONS:
+
+Use Action result from Microsoft.AspNetCore.Mvc, for wrapping response body
+
+For handling authentication use Microsoft.IdentityModel.JsonWebTokens. Products should be stored in db that already exists. You should not use same model for controller and db. 
+
+All new Endpoints should be protected with JWT Bearer Token
+
+use swagger for api documentation
+
+```
+
+**Výsledok:**  
+⭐⭐⭐ OK, potreboval viac úprav  
+
+**Úpravy:**
+```
+claude nezhodil db a nenaseedoval nove data, kedze upravoval db schemu. Musel som zadat command po mojom teste: 
+you have added new controllers and logic for orders and products. When I am trying to  get every products by endpoint GET:api/product I am getting 500 http status and error message 'An error occurred while retrieving products' [Image #1] 
+
+ Taktiez zle zadefinoval http metody PUT and POST, ked som ich nevymenoval, opravene po prompte:
+ when creating order, I am getting 'An error occured while creating order' [Image #1]. Please fix it, also check all endpoints if they work correctly and don't throw unexpected error. I have also noticed that you switched POST and PUT method in product and order controller. Post should be used for update and PUT for create
+
+```
+
+**Poznámky:**
+```
+treba ho upozornit na to, aby naseedoval na novo db po zmenach v db
+presnejsie definovat, alebo zamerat sa, aby PUT/ POST nezamienal
+```
 
 
 
