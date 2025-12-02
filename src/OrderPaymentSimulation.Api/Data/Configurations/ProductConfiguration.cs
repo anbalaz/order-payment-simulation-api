@@ -27,6 +27,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasPrecision(10, 2)
             .IsRequired();
 
+        builder.Property(p => p.Stock)
+            .HasColumnName("stock")
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.Property(p => p.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");

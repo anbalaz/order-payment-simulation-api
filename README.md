@@ -175,6 +175,196 @@ Authorization: Bearer <token>
 
 **Response (200 OK):** `{ "message": "User deleted successfully" }`
 
+### Product Management
+
+All product endpoints require JWT Bearer token authentication.
+
+#### Get All Products
+```http
+GET /api/product
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** Array of ProductDto
+```json
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "description": "High-performance laptop",
+    "price": 999.99,
+    "stock": 50,
+    "createdAt": "2025-01-15T10:00:00Z"
+  }
+]
+```
+
+#### Get Product by ID
+```http
+GET /api/product/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** ProductDto
+
+#### Create Product
+```http
+POST /api/product
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Gaming Mouse",
+  "description": "High precision gaming mouse",
+  "price": 59.99,
+  "stock": 100
+}
+```
+
+**Response (201 Created):** ProductDto with Location header
+
+**Validation:**
+- Name: Required, 1-100 characters
+- Price: Must be ≥ 0
+- Stock: Must be ≥ 0
+
+#### Update Product
+```http
+PUT /api/product/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Updated Name",
+  "description": "Updated description",
+  "price": 899.99,
+  "stock": 45
+}
+```
+
+**Response (200 OK):** Updated ProductDto
+
+#### Delete Product
+```http
+DELETE /api/product/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** `{ "message": "Product deleted successfully" }`
+
+**Note:** Products referenced in existing orders cannot be deleted (returns 409 Conflict).
+
+### Order Management
+
+All order endpoints require JWT Bearer token authentication. Users can only access their own orders.
+
+#### Get All Orders
+```http
+GET /api/order
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** Array of OrderDto for the current user
+```json
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "total": 1099.98,
+    "status": "Pending",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:00:00Z",
+    "items": [
+      {
+        "id": 1,
+        "productId": 1,
+        "productName": "Laptop",
+        "quantity": 1,
+        "price": 999.99,
+        "createdAt": "2025-01-15T10:00:00Z",
+        "updatedAt": "2025-01-15T10:00:00Z"
+      }
+    ]
+  }
+]
+```
+
+#### Get Order by ID
+```http
+GET /api/order/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** OrderDto
+
+**Authorization:** Returns 403 Forbidden if order belongs to another user.
+
+#### Create Order
+```http
+POST /api/order
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    },
+    {
+      "productId": 3,
+      "quantity": 1
+    }
+  ]
+}
+```
+
+**Response (201 Created):** OrderDto with Location header
+
+**Validation:**
+- Items: Required, must have at least 1 item
+- ProductId: Must exist in database
+- Quantity: Must be > 0
+- Stock: Must have sufficient stock available
+
+**Business Logic:**
+- Order total is calculated server-side from current product prices
+- Product prices are locked at order creation time
+- Product stock is automatically decreased by order quantity
+- Order status is automatically set to "Pending"
+- UserId is extracted from JWT token (not client input)
+
+#### Update Order Status
+```http
+PUT /api/order/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "id": 1,
+  "status": "Processing"
+}
+```
+
+**Response (200 OK):** Updated OrderDto
+
+**Status Values:** Pending (0), Processing (1), Completed (2), Cancelled (3), Expired (4)
+
+**Authorization:** Returns 403 Forbidden if order belongs to another user.
+
+#### Delete Order
+```http
+DELETE /api/order/{id}
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):** `{ "message": "Order deleted successfully" }`
+
+**Business Rule:** Only orders with status "Pending" can be deleted (returns 409 Conflict otherwise).
+
+**Authorization:** Returns 403 Forbidden if order belongs to another user.
+
 ### Testing the API
 
 1. **Using Swagger UI:**
@@ -222,11 +412,11 @@ The database is automatically seeded with:
 - test@example.com (password: Password123!)
 
 **Products:**
-- Laptop ($999.99)
-- Mouse ($29.99)
-- Keyboard ($79.99)
-- Monitor ($399.99)
-- Headphones ($199.99)
+- Laptop ($999.99, Stock: 50)
+- Mouse ($29.99, Stock: 200)
+- Keyboard ($79.99, Stock: 150)
+- Monitor ($399.99, Stock: 75)
+- Headphones ($199.99, Stock: 100)
 
 **Sample Orders:**
 - 3 orders for test user with various statuses
@@ -243,9 +433,22 @@ dotnet build OrderPaymentSimulation.Api.sln
 ### Run Tests
 
 ```bash
-# From repository root (when tests are added)
+# From repository root - run all tests
 dotnet test
+
+# Run only integration tests
+dotnet test test/IntegrationTests/IntegrationTests/IntegrationTests.csproj
+
+# Run only unit tests
+dotnet test test/UnitTests/UnitTests/UnitTests.csproj
+
+# Run with detailed output
+dotnet test --verbosity normal
 ```
+
+**Test Coverage:**
+- **Integration Tests (28 tests):** Authentication, User CRUD, Product CRUD, Order CRUD
+- **Unit Tests (12 tests):** JWT generation, Password hashing, DTO mapping
 
 ### Database Management
 

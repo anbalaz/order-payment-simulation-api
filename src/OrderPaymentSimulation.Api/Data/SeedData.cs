@@ -46,11 +46,11 @@ public static class SeedData
         // Seed Products
         var products = new[]
         {
-            new Product { Name = "Laptop", Description = "High-performance laptop", Price = 999.99m, CreatedAt = DateTime.UtcNow },
-            new Product { Name = "Mouse", Description = "Wireless mouse", Price = 29.99m, CreatedAt = DateTime.UtcNow },
-            new Product { Name = "Keyboard", Description = "Mechanical keyboard", Price = 79.99m, CreatedAt = DateTime.UtcNow },
-            new Product { Name = "Monitor", Description = "27-inch 4K monitor", Price = 399.99m, CreatedAt = DateTime.UtcNow },
-            new Product { Name = "Headphones", Description = "Noise-cancelling headphones", Price = 199.99m, CreatedAt = DateTime.UtcNow }
+            new Product { Name = "Laptop", Description = "High-performance laptop", Price = 999.99m, Stock = 50, CreatedAt = DateTime.UtcNow },
+            new Product { Name = "Mouse", Description = "Wireless mouse", Price = 29.99m, Stock = 200, CreatedAt = DateTime.UtcNow },
+            new Product { Name = "Keyboard", Description = "Mechanical keyboard", Price = 79.99m, Stock = 150, CreatedAt = DateTime.UtcNow },
+            new Product { Name = "Monitor", Description = "27-inch 4K monitor", Price = 399.99m, Stock = 75, CreatedAt = DateTime.UtcNow },
+            new Product { Name = "Headphones", Description = "Noise-cancelling headphones", Price = 199.99m, Stock = 100, CreatedAt = DateTime.UtcNow }
         };
 
         context.Products.AddRange(products);
@@ -92,15 +92,15 @@ public static class SeedData
         var orderItems = new[]
         {
             // Order 1 items
-            new OrderItem { OrderId = order1.Id, ProductId = products[0].Id, Quantity = 1, Price = 999.99m, CreatedAt = DateTime.UtcNow.AddDays(-5) },
-            new OrderItem { OrderId = order1.Id, ProductId = products[1].Id, Quantity = 1, Price = 29.99m, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+            new OrderItem { OrderId = order1.Id, ProductId = products[0].Id, Quantity = 1, Price = 999.99m, CreatedAt = DateTime.UtcNow.AddDays(-5), UpdatedAt = DateTime.UtcNow.AddDays(-4) },
+            new OrderItem { OrderId = order1.Id, ProductId = products[1].Id, Quantity = 1, Price = 29.99m, CreatedAt = DateTime.UtcNow.AddDays(-5), UpdatedAt = DateTime.UtcNow.AddDays(-4) },
 
             // Order 2 items
-            new OrderItem { OrderId = order2.Id, ProductId = products[3].Id, Quantity = 1, Price = 399.99m, CreatedAt = DateTime.UtcNow.AddDays(-2) },
-            new OrderItem { OrderId = order2.Id, ProductId = products[2].Id, Quantity = 1, Price = 79.99m, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+            new OrderItem { OrderId = order2.Id, ProductId = products[3].Id, Quantity = 1, Price = 399.99m, CreatedAt = DateTime.UtcNow.AddDays(-2), UpdatedAt = DateTime.UtcNow.AddDays(-1) },
+            new OrderItem { OrderId = order2.Id, ProductId = products[2].Id, Quantity = 1, Price = 79.99m, CreatedAt = DateTime.UtcNow.AddDays(-2), UpdatedAt = DateTime.UtcNow.AddDays(-1) },
 
             // Order 3 items
-            new OrderItem { OrderId = order3.Id, ProductId = products[4].Id, Quantity = 1, Price = 199.99m, CreatedAt = DateTime.UtcNow }
+            new OrderItem { OrderId = order3.Id, ProductId = products[4].Id, Quantity = 1, Price = 199.99m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
         context.OrderItems.AddRange(orderItems);

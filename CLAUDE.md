@@ -84,7 +84,9 @@ order-payment-simulation-api/
 ├── src/OrderPaymentSimulation.Api/
 │   ├── Controllers/          # API Controllers
 │   │   ├── AuthController.cs            # JWT authentication endpoint
-│   │   └── UserController.cs            # User CRUD endpoints
+│   │   ├── UserController.cs            # User CRUD endpoints
+│   │   ├── ProductController.cs         # Product CRUD endpoints (5 endpoints)
+│   │   └── OrderController.cs           # Order CRUD endpoints (5 endpoints)
 │   ├── Data/                 # Database context and configurations
 │   │   ├── Configurations/   # Entity Type Configurations (Fluent API)
 │   │   │   ├── OrderConfiguration.cs
@@ -98,7 +100,15 @@ order-payment-simulation-api/
 │   │   ├── UpdateUserRequest.cs         # User update DTO
 │   │   ├── UserDto.cs                   # User response DTO
 │   │   ├── LoginRequest.cs              # Login request DTO
-│   │   └── LoginResponse.cs             # Login response with JWT
+│   │   ├── LoginResponse.cs             # Login response with JWT
+│   │   ├── ProductDto.cs                # Product response DTO
+│   │   ├── CreateProductRequest.cs      # Product creation DTO
+│   │   ├── UpdateProductRequest.cs      # Product update DTO
+│   │   ├── OrderDto.cs                  # Order response DTO
+│   │   ├── OrderItemDto.cs              # Order item response DTO
+│   │   ├── CreateOrderRequest.cs        # Order creation DTO
+│   │   ├── CreateOrderItemRequest.cs    # Order item creation DTO
+│   │   └── UpdateOrderRequest.cs        # Order update DTO
 │   ├── Models/               # Domain entities
 │   │   ├── Order.cs
 │   │   ├── OrderItem.cs
@@ -117,12 +127,16 @@ order-payment-simulation-api/
 │   ├── IntegrationTests/IntegrationTests/
 │   │   ├── AuthControllerTests.cs       # Login endpoint tests (3 tests)
 │   │   ├── UserControllerTests.cs       # User CRUD tests (6 tests)
+│   │   ├── ProductControllerTests.cs    # Product CRUD tests (9 tests)
+│   │   ├── OrderControllerTests.cs      # Order CRUD tests (10 tests)
 │   │   ├── CustomWebApplicationFactory.cs
 │   │   └── IntegrationTests.csproj
 │   └── UnitTests/UnitTests/
 │       ├── JwtServiceTests.cs           # JWT generation tests (2 tests)
 │       ├── PasswordHashingTests.cs      # Password hashing tests (3 tests)
 │       ├── DtoMappingTests.cs           # DTO mapping tests (2 tests)
+│       ├── ProductDtoMappingTests.cs    # Product DTO mapping tests (2 tests)
+│       ├── OrderDtoMappingTests.cs      # Order DTO mapping tests (3 tests)
 │       └── UnitTests.csproj
 ├── Postgres/
 │   ├── docker-compose.yml    # PostgreSQL container setup
@@ -139,11 +153,12 @@ order-payment-simulation-api/
 - Constraints: Unique index on email, name max 100 chars
 
 **Product** (`Models/Product.cs`)
-- Properties: Id, Name, Description, Price, CreatedAt
+- Properties: Id, Name, Description, Price, **Stock**, CreatedAt
 - Relationships: One-to-Many with OrderItems
 - Database table: `products`
-- Constraints: Name max 100 chars, decimal(10,2) for price
+- Constraints: Name max 100 chars, decimal(10,2) for price, stock >= 0
 - Delete behavior: Restrict (prevents deletion if referenced)
+- **Stock Management:** Automatically decreased when orders are created
 
 **Order** (`Models/Order.cs`)
 - Properties: Id, UserId, Total, Status, CreatedAt, UpdatedAt
@@ -151,15 +166,17 @@ order-payment-simulation-api/
 - Database table: `orders`
 - Constraints: Index on status field
 - Delete behavior: Cascade from User, Cascade to OrderItems
+- **Authorization:** Users can only access their own orders
 
 **OrderItem** (`Models/OrderItem.cs`)
-- Properties: Id, OrderId, ProductId, Quantity, Price, CreatedAt
+- Properties: Id, OrderId, ProductId, Quantity, Price, CreatedAt, **UpdatedAt**
 - Relationships: Many-to-One with Order and Product
 - Database table: `order_items`
 - Constraints: Indexes on order_id and product_id
+- **Price Locking:** Price is stored at time of order creation (not current price)
 
 **OrderStatus** (`Models/OrderStatus.cs`)
-- Enum values: Pending (0), Processing (1), Completed (2), Cancelled (3)
+- Enum values: Pending (0), Processing (1), Completed (2), Cancelled (3), **Expired (4)**
 - Stored as short in database
 
 ### Database Configuration Pattern
@@ -229,9 +246,24 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
   - `PUT /api/user` - User registration
 
 - **Protected Endpoints (Require JWT Bearer Token)**:
-  - `GET /api/user/{id}` - Retrieve user by ID (any authenticated user)
-  - `POST /api/user` - Update user (users can only update their own profile)
-  - `DELETE /api/user/{id}` - Delete user (users can only delete their own account)
+  - **User Endpoints:**
+    - `GET /api/user/{id}` - Retrieve user by ID (any authenticated user)
+    - `POST /api/user` - Update user (users can only update their own profile)
+    - `DELETE /api/user/{id}` - Delete user (users can only delete their own account)
+
+  - **Product Endpoints (All authenticated users):**
+    - `GET /api/product` - List all products
+    - `GET /api/product/{id}` - Get product by ID
+    - `POST /api/product` - Create product
+    - `PUT /api/product/{id}` - Update product
+    - `DELETE /api/product/{id}` - Delete product (restricted if referenced in orders)
+
+  - **Order Endpoints (User-specific authorization):**
+    - `GET /api/order` - List current user's orders only
+    - `GET /api/order/{id}` - Get order (403 Forbidden if not owned by user)
+    - `POST /api/order` - Create order (UserId from JWT token)
+    - `PUT /api/order/{id}` - Update order status (403 Forbidden if not owned by user)
+    - `DELETE /api/order/{id}` - Delete order (403 Forbidden if not owned by user, 409 Conflict if not Pending)
 
 **Security Implementation**:
 - Password hashing using `PasswordHasher<User>` with bcrypt algorithm
@@ -243,7 +275,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
 **Implemented:**
 - Complete PostgreSQL database setup with Docker
-- Entity Framework Core with 4 domain models
+- Entity Framework Core with 4 domain models (User, Product, Order, OrderItem)
 - Fluent API entity configurations
 - Database seeding with test data
 - Password hashing using ASP.NET Identity
@@ -252,36 +284,44 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 - Snake_case database naming convention
 - **JWT Authentication with Bearer token validation**
 - **User CRUD API (UserController.cs)** - Create, Read, Update, Delete endpoints with authorization
+- **Product CRUD API (ProductController.cs)** - 5 endpoints with authentication and validation
+- **Order CRUD API (OrderController.cs)** - 5 endpoints with user-specific authorization
 - **Authentication API (AuthController.cs)** - Login endpoint with JWT token generation
-- **DTOs for API contracts** - Separation of domain models from API requests/responses
+- **DTOs for API contracts** - 13 DTOs for separation of domain models from API requests/responses
 - **Authorization middleware** - JWT Bearer authentication with claims-based authorization
+- **User-specific authorization** - Users can only access their own orders
 - **Input validation** - Data Annotations on DTOs for request validation
-- **Integration tests** - 9 tests covering authentication and user CRUD workflows
-- **Unit tests** - 7 tests for JWT generation, password hashing, and DTO mapping
+- **Stock management** - Automatic stock deduction when orders are created
+- **Price locking** - Order items store price at time of order creation
+- **Business rules** - Only pending orders can be deleted, products in orders cannot be deleted
+- **Integration tests** - 28 tests covering authentication, user CRUD, product CRUD, and order CRUD workflows
+- **Unit tests** - 12 tests for JWT generation, password hashing, and DTO mapping
 - **Swagger UI with JWT Bearer support** - Interactive API documentation with authentication
 - **Service layer** - IJwtService for JWT token generation
 
 **Pending Implementation:**
-- Domain-specific API controllers for Product, Order, and OrderItem entities
 - Repository pattern (optional architectural improvement)
 - Proper EF Core migrations (replace EnsureCreated)
-- Product, Order, and OrderItem DTOs
-- Order management endpoints with business logic
 - Payment processing simulation endpoints
 - Error handling middleware and global exception handling
 - API versioning
 - Rate limiting and request throttling
 - Logging and monitoring integration
+- Role-based authorization (Admin, User roles)
+- Refresh token implementation
+- Pagination for GET all endpoints
 
 **Known Limitations:**
 - Using `EnsureCreated()` instead of migrations (not production-ready)
-- Only User CRUD endpoints implemented - Product, Order, and OrderItem endpoints pending
 - No global exception handling middleware (returns default ASP.NET error responses)
 - JWT secret key stored in appsettings.json (should use environment variables or secrets manager in production)
 - No refresh token implementation (tokens expire after 60 minutes, requiring re-login)
-- Authorization checks are basic (users can only manage their own data, no role-based access control)
+- No role-based access control (all authenticated users can create/update/delete products)
 - Integration tests use in-memory database instead of test PostgreSQL instance
 - No API rate limiting or request throttling
+- No pagination on GET all endpoints (could be problematic with large datasets)
+- Stock is decreased but not restored on order deletion
+- No transaction rollback mechanism for failed order creations
 
 ## Development Guidelines
 
@@ -309,14 +349,27 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 - Custom factory with unique in-memory database per test instance
 - Test full HTTP request/response cycles through controllers
 - Cover authentication flows and protected endpoint authorization
-- Current coverage: 9 tests (AuthControllerTests, UserControllerTests)
+- **Current coverage: 28 tests**
+  - AuthControllerTests: 3 tests
+  - UserControllerTests: 6 tests
+  - ProductControllerTests: 9 tests
+  - OrderControllerTests: 10 tests
 
 **Unit Tests** (`test/UnitTests/UnitTests/`):
 - Use xUnit with FluentAssertions for readable assertions
 - Use AutoFixture for test data generation
 - Use Moq for mocking dependencies (when needed)
 - Test business logic in isolation (JWT service, password hashing, DTOs)
-- Current coverage: 7 tests (JwtServiceTests, PasswordHashingTests, DtoMappingTests)
+- **Current coverage: 12 tests**
+  - JwtServiceTests: 2 tests
+  - PasswordHashingTests: 3 tests
+  - DtoMappingTests: 2 tests (User DTOs)
+  - ProductDtoMappingTests: 2 tests
+  - OrderDtoMappingTests: 3 tests
+
+**Test Results:**
+- All 40 tests passing (28 integration + 12 unit)
+- Build: 0 warnings, 0 errors
 
 **Running Tests**:
 ```bash
@@ -338,34 +391,37 @@ dotnet test test/UnitTests/UnitTests/UnitTests.csproj
    ```
    Replace `EnsureCreated()` in Program.cs with `context.Database.Migrate()`
 
-2. **Create Product API endpoints** (ProductController)
-   - GET /api/product - List all products
-   - GET /api/product/{id} - Get product by ID
-   - POST /api/product - Create product (admin only)
-   - PUT /api/product/{id} - Update product (admin only)
-   - DELETE /api/product/{id} - Delete product (admin only)
-
-3. **Create Order API endpoints** (OrderController)
-   - GET /api/order - List user's orders
-   - GET /api/order/{id} - Get order details
-   - POST /api/order - Create new order
-   - PUT /api/order/{id}/status - Update order status
-   - DELETE /api/order/{id} - Cancel order
-
-4. **Implement payment simulation logic**
-   - POST /api/payment/process - Simulate payment processing
-   - Add payment status tracking to orders
-   - Implement order status workflow (Pending → Processing → Completed/Cancelled)
-
-5. **Add role-based authorization**
+2. **Add role-based authorization**
    - Extend JWT claims with roles (Admin, User)
    - Implement role checks in controllers using `[Authorize(Roles = "Admin")]`
+   - Restrict Product create/update/delete to Admin role only
    - Update seed data with admin user
 
-6. **Add global exception handling middleware**
+3. **Implement payment simulation logic**
+   - POST /api/payment/process - Simulate payment processing
+   - Add payment status tracking to orders
+   - Implement order status workflow (Pending → Processing → Completed/Cancelled → Expired)
+   - Add payment gateway integration simulation
+
+4. **Add global exception handling middleware**
    - Create custom exception handler middleware
    - Return consistent error response format
    - Log exceptions appropriately
+   - Handle database constraint violations gracefully
+
+5. **Add pagination to GET all endpoints**
+   - Implement PagedResult<T> DTO
+   - Add query parameters (page, pageSize, sortBy, sortOrder)
+   - Update GET /api/product and GET /api/order endpoints
+
+6. **Implement stock restoration on order deletion**
+   - When a pending order is deleted, restore product stock
+   - Add transaction handling for stock management
+
+7. **Add refresh token implementation**
+   - Create RefreshToken entity and configuration
+   - Implement token refresh endpoint
+   - Store refresh tokens securely in database
 
 ## Useful Commands
 
