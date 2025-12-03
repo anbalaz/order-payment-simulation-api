@@ -14,14 +14,10 @@
 
 Vyplň približný čas strávený s každým nástrojom:
 
-- [ ] **Cursor IDE:** _____ hodín
+- [ ] **Rider IDE:** 1 hodín
 - [ ] **Claude Code:** 5 hodín
-- [ ] **GitHub Copilot:** _____ hodín
-- [ ] **ChatGPT:** _____ hodín
-- [ ] **Claude.ai:** _____ hodín
-- [ ] **Iné:** 
 
-**Celkový čas vývoja (priližne):** _____ hodín
+**Celkový čas vývoja (priližne):** 12 hodín
 
 ---
 
@@ -316,7 +312,7 @@ vagne som naformuloval prompt :), lenivo
 
 **Prompt:**
 ```
- New controller for Products. Product has following fields: id, name string max length 100, description string, price number >=
+New controller for Products. Product has following fields: id, name string max length 100, description string, price number >=
 0, stock number >= 0, created_at timestamp.
 Validate input DTOs. If wrong return 400
 
@@ -384,6 +380,85 @@ you have added new controllers and logic for orders and products. When I am tryi
 ```
 treba ho upozornit na to, aby naseedoval na novo db po zmenach v db
 presnejsie definovat, alebo zamerat sa, aby PUT/ POST nezamienal
+```
+
+### Prompt #6: [Orders workflow]
+
+**Nástroj:** [ Claude Code]   
+**Kontext:** [Kafka and order workflows]
+
+**Prompt:**
+```
+
+Initialize Kafka in docker
+
+I have docker desktop app. Run Kafka in docker and Update existing docker-compose file so this service can be created inside docker. Include kafka into compose file, stored in Folder Postgres.
+Add mcp server and connect to it, add this settings to repository, so you can use it.
+
+move existing ./Postgres/docker-compose.yml file to root of project.
+
+add Kafka into the project, so the messages/events can be sent/published as transport system.
+---------------------------------------------
+How the kafka should work:
+
+When the order is created and stored in db with status 'pending', the 'OrderCreated' event has to be published
+
+OrderCreatedHandler (asynchronous) should handle this event and :
+    -handles 'OrderCreated' events
+    -Update order status: to 'processing' (update it in db)
+    -simulate payment processing (5 second delay)
+    -after this 5 sec simulation Update order status for 50% of cases to 'completed' and publish 'OrderCompleted' event
+    -In another 50% of cases do not change the status, it remains as 'processing'
+----------------------------------------------
+Order expiration handling:
+
+    - Add hosted backgroundService that runs every 60 seconds, gets all orders older than 10 minutes and have status 'processing' and updates it's status to 'expired'
+    - after updating publish 'OrderExpired' event
+----------------------------------------------
+Add new notification table into postgres db, update also seed script
+table should have reference at least to user and order, should also have field for notification and also if the order was completed or expired.
+
+Notification handler (asynchronous)
+    - handles 'OrderCompleted' and 'OrderExpired' events
+    - when 'OrderCompleted' event is published, log fake email notification into console (something like: order number 1234 for user user@email.com was issued containing products :...). Save notification to 'notification' table in database (as an audit trail)
+    - when 'OrderExpired' event is published, save notification to database (audit trail)
+
+-----------------------------------------------
+Expected Flow:
+1. User creates order via POST /api/orders
+2. Order saved to DB with status='pending'
+3. OrderCreated event published
+4. OrderProcessor handles event asynchronously:
+  -Updates status to 'processing'
+  -Simulates payment (5 sec delay)
+  -Updates status to 'completed'
+5. OrderCompleted event published
+6. Notifier handles event:
+  -Logs fake email to console
+  -Saves notification to DB
+7. CRON job runs every 60s:
+  -Finds pending orders older than 10 minutes
+  -Updates them to 'expired
+```
+
+**Výsledok:**  
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy
+
+**Úpravy:**
+```
+Claude po sebe neupratal nechal beziace instancie.
+
+ok close all usings of project 
+
+nepomohlo :D, zle formulovane, musel som dat novy command:
+
+Did you? I am getting: Warning MSB3026 : Could not copy "C:\Mine\order-payment-simulation-api\src\OrderPaymentSimulation.Api\obj\Debug\net8.0\apphost.exe" to "bin\Debug\net8.0\OrderPaymentSimulation.Api.exe". Beginning retry 1 in 1000ms. The process cannot access the file 
+'C:\Mine\order-payment-simulation-api\src\OrderPaymentSimulation.Api\bin\Debug\net8.0\OrderPaymentSimulation.Api.exe' because it is being used by another process. The file is locked by: "OrderPaymentSimulation.Api (27696)"
+```
+
+**Poznámky:**
+```
+po sebe by si mal vsetko starostlivo upratat, nechava spustene programi a instancie. Musim mu to pri instrukciach povedat.
 ```
 
 
