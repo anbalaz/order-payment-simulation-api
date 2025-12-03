@@ -461,7 +461,33 @@ Did you? I am getting: Warning MSB3026 : Could not copy "C:\Mine\order-payment-s
 po sebe by si mal vsetko starostlivo upratat, nechava spustene programi a instancie. Musim mu to pri instrukciach povedat.
 ```
 
+### Prompt #6: [Used my own commands]
 
+**Nástroj:** [ Claude Code]   
+**Kontext:** [ Used command /pr to create PR and after that I tried to fix it with prompt]
+
+**Prompt:**
+```
+ I asked you to use /pr command and inside it you used create-branch command. You created branch feature/kafka-event-driven-order-processing. In the command there is insturction to use snake case for naming branch, but you used kebab case. Please move those changes you commit to branch 'feature/kafka-event-driven-order-processing' to another branch that comply to my commamnds.     
+Also Update the commands, so you would not use kebab case in future, also remove any mention of Target Process. I also want to have option besides US number to pass argument if the changes are feature of hotfix and etc.
+```
+
+**Výsledok:**  
+⭐⭐⭐⭐ Dobré, potreboval malé úpravy
+
+**Úpravy:**
+```
+Urobil upravy v commande, ale pridal tam backticks, s ktorymi to nefunguje,
+tak som ho v ramci jeho otazky, ci je vsetko ok napisal: 
+
+please also remove backticks from commands you added, because with those command does not work
+
+```
+
+**Poznámky:**
+```
+Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonzistentne, teraz po sebe upratal, ale pri predchadzajucom prompte za sebou nechal binec
+```
 
 
 
