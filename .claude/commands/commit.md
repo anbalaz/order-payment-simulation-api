@@ -30,16 +30,16 @@ Add all staged changes and create a commit following the Conventional Commits sp
 
 **When to include #<US-number>**:
 - If $ARGUMENTS is provided, use that as the US number
-- Otherwise, extract the US number from the branch name (e.g., `feature/12345_description` → `12345`)
-- Append `#<US-number>` at the end of commit description **ONLY for the first commit** on the branch
+- Otherwise, extract the US number from the branch name (e.g., feature/12345_description → 12345)
+- Append #<US-number> at the end of commit description **ONLY for the first commit** on the branch
 - Subsequent commits on the same branch do **NOT** need the US number
-- If no US number exists and no $ARGUMENTS provided (e.g., `feature/kafka_integration`), don't append a number
+- If no US number exists and no $ARGUMENTS provided (e.g., feature/kafka_integration), don't append a number
 
 ---
 
 ## Breaking Changes
 
-Use `!` after type/scope (e.g., `feat(api)!: breaking change`) or include `BREAKING CHANGE:` in footer.
+Use ! after type/scope (e.g., feat(api)!: breaking change) or include BREAKING CHANGE: in footer.
 
 ---
 

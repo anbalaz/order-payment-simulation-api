@@ -3,9 +3,9 @@
 Create a pull request using the gh CLI.
 
 **Optional Arguments**: $ARGUMENTS can be:
-- A US number (e.g., `12345`) - will be used as `#12345` in PR title
-- A type (e.g., `feature`, `hotfix`, `bugfix`) - will be used as the PR type if branch name doesn't clearly indicate it
-- Format: `<type> <us-number>` (e.g., `feature 12345`) - provides both type and US number
+- A US number (e.g., 12345) - will be used as #12345 in PR title
+- A type (e.g., feature, hotfix, bugfix) - will be used as the PR type if branch name doesn't clearly indicate it
+- Format: <type> <us-number> (e.g., feature 12345) - provides both type and US number
 
 ---
 
@@ -24,19 +24,19 @@ Create a pull request using the gh CLI.
 Use the same commit types and conventions as defined in /commit command.
 
 **Type Determination** (in order of priority):
-1. If $ARGUMENTS contains a type (e.g., `feature`, `hotfix`), use that
-2. Otherwise, extract type from branch name (first part before `/`)
+1. If $ARGUMENTS contains a type (e.g., feature, hotfix), use that
+2. Otherwise, extract type from branch name (first part before /)
 3. Map to appropriate conventional commit type
 
 **US Number**:
-- If $ARGUMENTS contains a number, use that as `#<number>` in the title
+- If $ARGUMENTS contains a number, use that as #<number> in the title
 - Otherwise, extract the numeric ID from the branch name
-- If no number found, omit the `#<number>` from title
+- If no number found, omit the #<number> from title
 
 **Examples**:
-- `feat: implement Kafka event-driven order processing #820747`
-- `hotfix: resolve payment validation error #123456`
-- `refactor: improve database connection handling` (no US number)
+- feat: implement Kafka event-driven order processing #820747
+- hotfix: resolve payment validation error #123456
+- refactor: improve database connection handling (no US number)
 
 ---
 
@@ -55,9 +55,9 @@ Use the same commit types and conventions as defined in /commit command.
 
 ### Example 1: Feature with US number
 
-**Command**: `/pr 12345` or `/pr feature 12345`
+**Command**: /pr 12345 or /pr feature 12345
 
-**Title**: `feat: add user authentication endpoint #12345`
+**Title**: feat: add user authentication endpoint #12345
 
 **Body**:
 ```
@@ -69,9 +69,9 @@ Use the same commit types and conventions as defined in /commit command.
 
 ### Example 2: Hotfix without US number
 
-**Command**: `/pr hotfix` (branch: `hotfix/fix_payment_bug`)
+**Command**: /pr hotfix (branch: hotfix/fix_payment_bug)
 
-**Title**: `hotfix: resolve payment validation error`
+**Title**: hotfix: resolve payment validation error
 
 **Body**:
 ```
@@ -83,9 +83,9 @@ Use the same commit types and conventions as defined in /commit command.
 
 ### Example 3: Feature without arguments
 
-**Command**: `/pr` (branch: `feature/kafka_integration`)
+**Command**: /pr (branch: feature/kafka_integration)
 
-**Title**: `feat: implement Kafka event-driven architecture`
+**Title**: feat: implement Kafka event-driven architecture
 
 **Body**:
 ```

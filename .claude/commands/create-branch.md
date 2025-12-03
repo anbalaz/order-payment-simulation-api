@@ -14,7 +14,7 @@ Create a new branch following the project's branch naming conventions.
 - **ALWAYS use UNDERSCORES (_)** to separate words in branch names
 - **NEVER use hyphens/dashes (-)** - this is a strict requirement
 - ID must come IMMEDIATELY after the slash (or after optional-name/ if present)
-- Format is: `type/ID_description` OR `type/optional-name/ID_description`
+- Format is: type/ID_description OR type/optional-name/ID_description
 
 ---
 
@@ -39,12 +39,12 @@ Create a new branch following the project's branch naming conventions.
 **ID**: The numeric identifier for the branch (MUST come right after the slash before description)
 - Use $ARGUMENTS if provided as the identifier
 - User Story number (e.g., 12345) - do NOT use hash # in branch name
-- For non-ticketed work, use descriptive name (e.g., `kafka_integration`)
+- For non-ticketed work, use descriptive name (e.g., kafka_integration)
 
 **Description**: Accurately describes the purpose of the branch
 - **Use underscores (_)** to separate words - **NEVER use hyphens (-)**
 - Keep it short and descriptive
-- Examples: `mobile_banners`, `prepare_data`, `kafka_event_driven_processing`
+- Examples: mobile_banners, prepare_data, kafka_event_driven_processing
 - Comes AFTER the ID, separated by underscore
 
 ---
