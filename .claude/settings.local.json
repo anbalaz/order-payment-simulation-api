@@ -13,7 +13,13 @@
       "Bash(tree:*)",
       "Bash(git add:*)",
       "Bash(git rm:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebFetch(domain:docs.confluent.io)",
+      "WebFetch(domain:code-maze.com)",
+      "WebFetch(domain:www.baeldung.com)",
+      "WebFetch(domain:jskim1991.medium.com)",
+      "WebFetch(domain:developer.confluent.io)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

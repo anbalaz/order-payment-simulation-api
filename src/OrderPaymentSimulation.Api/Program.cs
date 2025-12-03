@@ -20,6 +20,18 @@ builder.Services.AddDbContext<OrderPaymentDbContext>(options =>
 // Add JWT Service
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Register Kafka services
+builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+builder.Services.AddHostedService<OrderCreatedEventConsumer>();
+builder.Services.AddHostedService<NotificationEventConsumer>();
+builder.Services.AddHostedService<OrderExpirationService>();
+
+builder.Services.AddLogging(config =>
+{
+    config.AddConsole();
+    config.AddDebug();
+});
+
 builder.Services.AddControllers();
 
 // Configure JWT Authentication

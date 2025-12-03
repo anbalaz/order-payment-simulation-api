@@ -105,5 +105,22 @@ public static class SeedData
 
         context.OrderItems.AddRange(orderItems);
         context.SaveChanges();
+
+        // Seed Notifications (sample audit trail)
+        var notifications = new[]
+        {
+            new Notification
+            {
+                UserId = testUser.Id,
+                OrderId = order1.Id,
+                Message = $"Order #{order1.Id} for user {testUser.Email} was completed. Items: Laptop, Mouse. Total: ${order1.Total}",
+                Status = NotificationStatus.OrderCompleted,
+                CreatedAt = DateTime.UtcNow.AddDays(-4),
+                UpdatedAt = DateTime.UtcNow.AddDays(-4)
+            }
+        };
+
+        context.Notifications.AddRange(notifications);
+        context.SaveChanges();
     }
 }

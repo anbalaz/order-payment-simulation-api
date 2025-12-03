@@ -2,12 +2,7 @@
 
 Add all staged changes and create a commit following the Conventional Commits specification.
 
-**Optional Parameters**: $ARGUMENTS can include:
-- US Number (e.g., 12345)
-- Type (e.g., feat, fix, chore, docs, test, refactor, style, perf, ci, build, revert)
-- Both in any order (e.g., "12345 feat" or "feat 12345")
-
-If parameters are provided, use them; otherwise, extract type/US number from branch name or ask the user.
+**Optional US Number**: $ARGUMENTS (if provided, use this as the US number instead of extracting from branch name)
 
 ---
 
@@ -16,28 +11,29 @@ If parameters are provided, use them; otherwise, extract type/US number from bra
 **Structure**: <type>[optional scope]: <description>
 
 **Valid Types**:
-- build: Build system or external dependencies
-- ci: CI configuration files/scripts
-- chore: Changes that don't modify src or test sources
-- docs: Documentation only
-- feat: New feature
-- fix: Bug fix
-- perf: Performance improvement
-- refactor: Code change that neither fixes a bug nor adds a feature
-- revert: Reverts previous commits
-- style: Formatting changes (whitespace, comments, etc.)
-- test: Adding or correcting tests
+- **build**: Build system or external dependencies
+- **ci**: CI configuration files/scripts
+- **chore**: Changes that don't modify src or test sources
+- **docs**: Documentation only
+- **feat**: New feature
+- **fix**: Bug fix
+- **hotfix**: Urgent production fixes
+- **perf**: Performance improvement
+- **refactor**: Code change that neither fixes a bug nor adds a feature
+- **revert**: Reverts previous commits
+- **style**: Formatting changes (whitespace, comments, etc.)
+- **test**: Adding or correcting tests
 
 ---
 
-## User Story Number Rules
+## US Number Rules
 
-**When to include #<ID>**:
+**When to include #<US-number>**:
 - If $ARGUMENTS is provided, use that as the US number
-- Otherwise, extract the numeric ID from the branch name (e.g., feature/12345_description → 12345)
-- Append #<ID> at the end of commit description **ONLY for the first commit** on the branch
+- Otherwise, extract the US number from the branch name (e.g., feature/12345_description → 12345)
+- Append #<US-number> at the end of commit description **ONLY for the first commit** on the branch
 - Subsequent commits on the same branch do **NOT** need the US number
-- If no numeric ID exists and no $ARGUMENTS provided (e.g., feature/backstage_terraform), don't append a number
+- If no US number exists and no $ARGUMENTS provided (e.g., feature/kafka_integration), don't append a number
 
 ---
 
@@ -47,18 +43,9 @@ Use ! after type/scope (e.g., feat(api)!: breaking change) or include BREAKING C
 
 ---
 
-## Usage Examples
+## Examples
 
-```
-/commit                    # Extract type/US from branch name or ask
-/commit 12345              # Use US number 12345
-/commit feat               # Use type 'feat'
-/commit 12345 feat         # Use both (any order)
-/commit feat 12345         # Use both (any order)
-```
-
-## Commit Message Examples
-
+**Correct branch naming (snake_case with underscores)**:
 ```
 # Branch: feature/12345_user_authentication
 # First commit only
@@ -81,13 +68,23 @@ feat(wishlist)!: breaking change to wishlist API #45678
 # Branch: release/1.123.0RC
 chore: prepare release 1.123.0RC
 
-# Branch: feature/backstage_terraform (no numeric ID)
-ci: add Confluent validation to PR workflow
+# Branch: feature/kafka_integration (no numeric ID)
+ci: add Kafka integration to event processing
+
+# Branch: feature/order_processing_notifications
+feat: implement event-driven order notifications
+```
+
+**Wrong branch naming (kebab-case with hyphens - DO NOT USE)**:
+```
+# ❌ feature/kafka-integration (should be feature/kafka_integration)
+# ❌ hotfix/order-fix (should be hotfix/order_fix)
 ```
 
 ---
 
 ## Additional Notes
 
-- **Never commit directly to master branch** - use /create-branch first to create a proper feature branch
+- **Never commit directly to main branch** - use /create-branch first to create a proper feature branch with **snake_case naming (underscores, not hyphens)**
 - **Do NOT add** "Generated with Claude Code" or "Co-Authored-By: Claude" attribution
+- **Always use underscores (_)** in branch names, never hyphens (-)

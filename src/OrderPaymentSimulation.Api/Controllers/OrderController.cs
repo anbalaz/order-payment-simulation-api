@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using order_payment_simulation_api.Data;
 using order_payment_simulation_api.Dtos;
 using order_payment_simulation_api.Models;
+using order_payment_simulation_api.Services;
 using System.Security.Claims;
 
 namespace order_payment_simulation_api.Controllers;
@@ -14,11 +15,16 @@ public class OrderController : ControllerBase
 {
     private readonly OrderPaymentDbContext _context;
     private readonly ILogger<OrderController> _logger;
+    private readonly IKafkaProducerService _kafkaProducerService;
 
-    public OrderController(OrderPaymentDbContext context, ILogger<OrderController> logger)
+    public OrderController(
+        OrderPaymentDbContext context,
+        ILogger<OrderController> logger,
+        IKafkaProducerService kafkaProducerService)
     {
         _context = context;
         _logger = logger;
+        _kafkaProducerService = kafkaProducerService;
     }
 
     /// <summary>
@@ -194,6 +200,34 @@ public class OrderController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Order created: {OrderId} for user {UserId}", order.Id, currentUserId);
+
+            // Publish OrderCreated event to Kafka
+            try
+            {
+                var orderCreatedEvent = new OrderCreatedEvent
+                {
+                    OrderId = order.Id,
+                    UserId = currentUserId,
+                    Total = total,
+                    CreatedAt = order.CreatedAt
+                };
+
+                var topic = HttpContext.RequestServices
+                    .GetRequiredService<IConfiguration>()
+                    .GetSection("Kafka")["Topics:OrderCreated"];
+
+                await _kafkaProducerService.PublishAsync(
+                    topic!,
+                    order.Id.ToString(),
+                    orderCreatedEvent);
+
+                _logger.LogInformation("OrderCreated event published for Order {OrderId}", order.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to publish OrderCreated event for Order {OrderId}", order.Id);
+                // Don't fail the request if Kafka publish fails - order is already saved
+            }
 
             // Reload with includes for response
             var createdOrder = await _context.Orders
