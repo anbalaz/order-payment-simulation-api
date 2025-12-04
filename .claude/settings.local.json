@@ -19,7 +19,9 @@
       "WebFetch(domain:www.baeldung.com)",
       "WebFetch(domain:jskim1991.medium.com)",
       "WebFetch(domain:developer.confluent.io)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create --title \"feat: implement Kafka event-driven order processing and notifications\" --body \"$(cat <<''EOF''\n## Summary\n- Integrated Apache Kafka for event-driven order processing\n- Implemented order created, completed, and expired event producers\n- Added background consumers for order processing and notifications\n- Created automatic order expiration service (1-hour timeout)\n- Introduced Notification entity for audit trail of all notifications\n- Added comprehensive integration and unit tests for Kafka functionality\n- Updated command files to enforce snake_case branch naming\n- Documented Claude Code usage and command improvements\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
