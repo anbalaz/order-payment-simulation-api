@@ -491,69 +491,56 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ---
 
 ## 3. Problémy a Riešenia 
 
 > 💡 **Tip:** Problémy sú cenné! Ukazujú ako riešiš problémy s AI.
 
-### Problém #1: _________________________________
+### Problém #1: Nevytvoril spravne endpointy pre Orders/Products
 
 **Čo sa stalo:**
 ```
-[Detailný popis problému - čo nefungovalo? Aká bola chyba?]
+[povedal som mu aby vytvoril crud API endpointy pre produkty a ordery, vyrovil ich, ale prehodil PUT/POST metody + nevytvoril DELETE metody]
 ```
 
 **Prečo to vzniklo:**
 ```
-[Tvoja analýza - prečo AI toto vygeneroval? Čo bolo v prompte zlé?]
+[Kedze som munezadefinoval crud operation, mohol cerpat data odhocikadial, mal som ho odkazat na konkretny zdroj, alebo mu vymenovat, co to presne musi obsahovat. To som sprvil pri Userovi, pri produktoch a orderoch som ho odkazal len na CRUD]
 ```
 
 **Ako som to vyriešil:**
 ```
-[Krok za krokom - čo si urobil? Upravil prompt? Prepísal kód? Použil iný nástroj?]
+[Poukazal som mu, ze nevytvoril endpointy pre delete a zamenil POST s PUT metodou]
 ```
 
 **Čo som sa naučil:**
 ```
-[Konkrétny learning pre budúcnosť - čo budeš robiť inak?]
+[Od AI necakat, ze uhadne, co chceme spravit. Treba mu explicitne napisat, ak nieco konkretne vyzadujeme. Ale ak je nam to jedno, akym stylom to spravi, tak je to v poriadku, ale vysledok tomu zodpoveda]
 ```
-
-**Screenshot / Kód:** [ ] Priložený
 
 ---
 
-### Problém #2: _________________________________
+### Problém #2: Neupratal si po sebe
 
 **Čo sa stalo:**
 ```
+Pri viacerych promptoch som vyzadoval, aby si AI nasledne spravilo kolecko a vyskusalo, ci vsetko spravne funguje a ci data sa upravia v db. Nenapisal som mu explicitne, aby po sebe upratal
 ```
 
 **Prečo:**
 ```
+Ocakaval som, ze to spravi automaticky, ze vrati projekt v spustitelnom stave.
 ```
 
 **Riešenie:**
 ```
+Treba mu napisat, aby po sebe zahodil testovacie scripty a vypol vsetky procesy, ktore pouzival pri vytvarani kodu a jeho kontrole
 ```
 
 **Learning:**
 ```
+Neocakavat, napisat, co chceme.
 ```
 
 ## 4. Kľúčové Poznatky
@@ -562,34 +549,24 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 **1.** 
 ```
-[Príklad: Claude Code pre OAuth - fungoval first try, zero problémov]
+[vsetky prompty, kedze som si na nich dal zalezat po par, minimalnych dopytaniach fungovali spravne, celkovo som mal pocit, ze to nie je mozne, ze to funguje vsetko :D]
 ```
-
-**2.** 
-```
-```
-
-**3.** 
-```
-```
-
-**[ Pridaj viac ak chceš ]**
-
----
 
 ### 4.2 Čo bolo náročné
 
 **1.** 
 ```
-[Príklad: Figma MCP spacing - často o 4-8px vedľa, musel som manuálne opravovať]
+[Cele zadanie mi robilo problem, technologie (docker and postgresql + verzovanie db migracie) nerobievam s nimi v praci a tak som sa musel velmi spoliehat na AI nastroj, ze to urobi on, prijemne ma prekvapil ]
 ```
 
 **2.** 
 ```
+[nepacila sa mi struktura prjektu, ani nugety, ktore AI pouzil, ale na jeho obranu som mu ani ziadne z toho nedefinoval. Keby som mal viac casu, tak by sa s tym dalo viac pohrat]
 ```
 
 **3.** 
 ```
+[narocne mu dat nejaky code style na ktory som zvyknuty, lebo to bol cisty projekt, kde neboli ziadne priklady, od nicoho co by sa odrazil. Nemam ani nejake svoje referencne projekty, od ktorych by sa mohol odrazit.]
 ```
 
 ---
@@ -598,23 +575,17 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 **1.** 
 ```
-[Príklad: Vždy špecifikuj verziu knižnice v prompte - "NextAuth.js v5"]
+[Ak chcem pouzit konkretny nuget, treba mu ho vyspecifikovat]
 ```
 
 **2.** 
 ```
+[Ked ho ziadam o to, aby cely workflow otestoval, musim mu napisat, aby aj vsetko po sebe upratal a vypol procesy]
 ```
 
 **3.** 
 ```
-```
-
-**4.** 
-```
-```
-
-**5.** 
-```
+[Pri zadavani promptu nemozem byt lenivy, cim viac energie a prace do promptu vlozim, o to menej prace potom budem mat]
 ```
 
 ---
@@ -623,15 +594,22 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 **Tip #1:**
 ```
-[Konkrétny, actionable tip]
+[nevyuzivat claude code na vsetko, velmi rychlo mina tokeny. Pouzivat ho na PR, commity, branche nie je moc efektivne vyuzitie nastroja, on sa pozrie na vsetky zmeny a spracovava ich, zerie to prilis vela zdrojov. ]
 ```
 
 **Tip #2:**
 ```
+ak idem vyuzit AI, kde mam obmedzene zdroje, pripravit poriadny prompt, agent spravy len taku dobru pracu, ake dobre instrukcie dostane
 ```
 
 **Tip #3:**
 ```
+nebat sa skusat spociatku experimentovat a zistovat hranice, resp. zmysel vyuzitia AI nastroja.
+```
+
+**Tip #4:**
+```
+AI si nedomysla co chceme, treba kontrolovat vystupy a korigovat ho este kym nespravi vsetky upravy. Potom to uz bude len narocnejsie.
 ```
 
 ---
@@ -640,16 +618,18 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 ### 6.1 Efektivita AI nástrojov
 
-**Ktorý nástroj bol najužitočnejší?** _________________________________
+**Ktorý nástroj bol najužitočnejší?** [claude code]
 
 **Prečo?**
 ```
+vsestranny, mozem pouzivat z konzoly v hociakom prostredi. Cez to context engineering mi dava obrovsky zmysel, hned som zaviedol do praxe. Aj ine AI nastroje su toho schopne, neskusal som, ale claude code je urcite dobre riesenie.
 ```
 
-**Ktorý nástroj bol najmenej užitočný?** _________________________________
+**Ktorý nástroj bol najmenej užitočný?** asi Copilot v mode Ask
 
 **Prečo?**
 ```
+nikdy som preto nenasiel pouzitie, ak chcem mozem sa spytat bezneho LLM alebo mi vzdy stacil aj copilot v edit alebo Agent mode
 ```
 
 ---
@@ -658,19 +638,19 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 ```
 [Čo ťa najviac prekvapilo pri práci s AI?]
 ```
-
+najviac ma prekvapilo, aky velky rozdiel robi, ked zadame kontext AI, vzdy som si myslel, ze Agent si cely ten kontext nejak domysli, resp. ze moje prompty su jednoznacne, ale neboli.
 ---
 
 ### 6.3 Najväčšia frustrácia
 ```
 [Čo bolo najfrustrujúcejšie?]
 ```
-
+ked som pouzil context engineering v praci a po vyse hodine mi vyplul slabe az zle riesenie, lebo som zle zadal prompt a povedal som si, ze to hadam vydedukuje :D
 ---
 
 ### 6.4 Najväčší "AHA!" moment
 ```
-[Kedy ti došlo niečo dôležité o AI alebo o developmente?]
+[Ked som rozsiril kontext a velkost promptu, uplne to zmenilo moj pohlad na to, co so spravnym zadanim vie AI spravit]
 ```
 
 ---
@@ -682,5 +662,5 @@ Ocakaval som, ze nezahodi staru branchu, ale zahodil, niekedy sa to chova nekonz
 
 ### 6.6 Hlavný odkaz pre ostatných
 ```
-[Keby si mal povedať jednu vec kolegom o AI development, čo by to bylo?]
+[context engineering je urcite cesta, ktora zlepsi vyvoj, nie je to ten isty vysledok ako pisanie promptu do AI]
 ```
